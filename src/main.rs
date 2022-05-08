@@ -1,9 +1,9 @@
 use std::path::Path;
+
 use gameboy_rust_webassembly_emulator::hardware::cartridge::Cartridge;
-use gameboy_rust_webassembly_emulator::hardware::memory::Memory;
 
 fn main() {
-    // let memory = Memory::new();
-    // println!("{}", memory.length());
-    Cartridge::load(Path::new("hehe"))
+    let cartridge = Cartridge::load(Path::new("roms/tetris.gb"));
+    println!("TITLE: {:?}", cartridge.get_title());
+    println!("ROM_SIZE: {:?}", cartridge.get_header());
 }
