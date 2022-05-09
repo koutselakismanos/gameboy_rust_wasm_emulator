@@ -13,12 +13,21 @@ pub struct Cartridge {
 
 #[derive(Debug)]
 pub struct CartridgeHeader {
+    entry_point: [u8; 4],
+    nintendo_logo: [u8; 48],
     title: String,
+    manufacturer_code: [u8; 4],
+    cgb_flag: u8,
+    new_licensee_code: [u8; 2],
+    sgb_flag: u8,
     cartridge_type: u8,
     rom_size: u8,
     ram_size: u8,
+    destination_code: u8,
+    old_licensee_code: u8,
+    mask_rom_version_number: u8,
     header_checksum: u8,
-    global_checksum: u8,
+    global_checksum: [u8; 2],
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -72,36 +81,72 @@ impl Cartridge {
         let mut data = vec![];
         File::open(path).and_then(|mut f| f.read_to_end(&mut data)).map_err(|_| "Could not read ROM");
 
+        let entry_point_range = Cartridge::range_map(CartridgeSection::EntryPoint);
+        let entry_point = data[entry_point_range].try_into().unwrap();
+
+        let nintendo_logo_range = Cartridge::range_map(CartridgeSection::NintendoLogo);
+        let nintendo_logo = data[nintendo_logo_range].try_into().unwrap();
+
         let title_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::Title);
         let title: String =
             String::from_utf8_lossy(&data[title_range])
                 .trim_matches(char::from(0))
                 .to_string();
 
-        let cartridge_type_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::CartridgeType);
+        let manufacturer_code_range = Cartridge::range_map(CartridgeSection::ManufacturerCode);
+        let manufacturer_code  = data[manufacturer_code_range].try_into().unwrap();
+
+        let cgb_flag_range = Cartridge::range_map(CartridgeSection::CGBFlag);
+        let cgb_flag = data[cgb_flag_range][0];
+
+        let new_licensee_code_range = Cartridge::range_map(CartridgeSection::NewLicenseeCode);
+        let new_licensee_code = data[new_licensee_code_range].try_into().unwrap();
+
+        let sgb_flag_range = Cartridge::range_map(CartridgeSection::SGBFlag);
+        let sgb_flag = data[sgb_flag_range][0];
+
+        let cartridge_type_range = Cartridge::range_map(CartridgeSection::CartridgeType);
         let cartridge_type: u8 = data[cartridge_type_range][0];
 
-        let rom_size_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::ROMSize);
+        let rom_size_range = Cartridge::range_map(CartridgeSection::ROMSize);
         let rom_size: u8 = data[rom_size_range][0];
 
-        let ram_size_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::RAMSize);
+        let ram_size_range = Cartridge::range_map(CartridgeSection::RAMSize);
         let ram_size: u8 = data[ram_size_range][0];
 
-        let header_checksum_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::HeaderChecksum);
+        let destination_code_range = Cartridge::range_map(CartridgeSection::DestinationCode);
+        let destination_code: u8 = data[destination_code_range][0];
+
+        let old_licensee_code_range = Cartridge::range_map(CartridgeSection::OldLicenseeCode);
+        let old_licensee_code: u8 = data[old_licensee_code_range][0];
+
+        let mask_rom_version_number_range = Cartridge::range_map(CartridgeSection::MaskROMVersionNumber);
+        let mask_rom_version_number: u8 = data[mask_rom_version_number_range][0];
+
+        let header_checksum_range = Cartridge::range_map(CartridgeSection::HeaderChecksum);
         let header_checksum: u8 = data[header_checksum_range][0];
 
-        let global_checksum_range: RangeInclusive<usize> = Cartridge::range_map(CartridgeSection::GlobalChecksum);
-        let global_checksum: u8 = data[global_checksum_range][0];
+        let global_checksum_range = Cartridge::range_map(CartridgeSection::GlobalChecksum);
+        let global_checksum = data[global_checksum_range].try_into().unwrap(); // TODO: should return a 16bit global_checksum
 
         Cartridge {
             filename: path.file_name().unwrap().to_str().unwrap().to_string(),
             header: CartridgeHeader {
+                entry_point,
+                nintendo_logo,
                 title,
+                manufacturer_code,
+                cgb_flag,
+                new_licensee_code,
+                sgb_flag,
                 cartridge_type,
                 rom_size,
                 ram_size,
+                destination_code,
+                old_licensee_code,
+                mask_rom_version_number,
                 header_checksum,
-                global_checksum
+                global_checksum,
             },
         }
     }
