@@ -7,8 +7,9 @@ use std::ops::{Range, RangeInclusive};
 use std::path::Path;
 
 pub struct Cartridge {
-    pub filename: String,
+    filename: String,
     pub header: CartridgeHeader,
+    data: Vec<u8>
 }
 
 #[derive(Debug)]
@@ -148,7 +149,16 @@ impl Cartridge {
                 header_checksum,
                 global_checksum,
             },
+            data
         }
+    }
+
+    pub fn read(&self, address: u16) -> u8 {
+        self.data[address as usize]
+    }
+
+    pub fn write(&mut self, address: u16, value: u8) {
+        self.data[address as usize] = value;
     }
 
     #[cfg(target_family = "wasm")]

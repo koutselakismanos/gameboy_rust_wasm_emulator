@@ -6,7 +6,7 @@ extern crate wasm_bindgen_test;
 
 use wasm_bindgen_test::*;
 
-use gameboy_rust_webassembly_emulator::hardware::memory::{MAX_RAM, Memory};
+use gameboy_rust_webassembly_emulator::hardware::cpu::memory::{MAX_RAM, Memory};
 
 wasm_bindgen_test_configure!(run_in_browser);
 

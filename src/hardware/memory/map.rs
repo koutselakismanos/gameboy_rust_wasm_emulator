@@ -1,1 +1,0 @@
-pub const ROM: (u16, u16) = (0x0000, 0x7fff);

@@ -1,5 +1,3 @@
-mod map;
-
 pub const MAX_RAM: usize = u16::MAX as usize;
 
 pub struct Memory {
