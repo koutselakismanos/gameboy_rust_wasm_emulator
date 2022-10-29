@@ -1,4 +1,7 @@
 use std::path::Path;
+use std::{thread, time};
+use std::thread::sleep;
+use std::time::Duration;
 
 use eframe::egui;
 
@@ -17,19 +20,25 @@ fn main() {
     let mut cpu = CPU::new(cartridge);
     println!("yo {:X} {:X}", cpu.bus_read(0x216), cpu.bus_read(0x217));
 
-    while cpu.is_running {
-        cpu.step();
-        if cpu.registers.pc == 0x21B {
-            cpu.stop();
-        }
-    }
+    let running_cpu = thread::spawn(move || {
+        while cpu.is_running {
+            cpu.step();
 
-    let options = eframe::NativeOptions::default();
-    eframe::run_native(
-        "My emulator",
-        options,
-        Box::new(|_cc| Box::new(MyApp::new(cpu))),
-    );
+            if cpu.registers.pc == 0x21B {
+                cpu.stop();
+            }
+            sleep(Duration::from_millis(100));
+        }
+    });
+
+    // let options = eframe::NativeOptions::default();
+    // eframe::run_native(
+    //     "My emulator",
+    //     options,
+    //     Box::new(|_cc| Box::new(MyApp::new(cpu))),
+    // );
+    println!("yoooooo");
+    running_cpu.join().unwrap();
 }
 
 struct MyApp {
@@ -69,13 +78,17 @@ impl eframe::App for MyApp {
             });
             ui.label(format!("B: 0x{:X}", self.cpu.registers.b));
             ui.label(format!("C: 0x{:X}", self.cpu.registers.c));
+            ui.label(format!("D: 0x{:X}", self.cpu.registers.d));
+            ui.label(format!("E: 0x{:X}", self.cpu.registers.e));
             ui.label(format!("H: 0x{:X}", self.cpu.registers.h));
             ui.label(format!("L: 0x{:X}", self.cpu.registers.l));
             ui.label(format!("AF: 0x{:X}", self.cpu.registers.get_af()));
             ui.label(format!("BC: 0x{:X}", self.cpu.registers.get_bc()));
+            ui.label(format!("DE: 0x{:X}", self.cpu.registers.get_de()));
             ui.label(format!("HL: 0x{:X}", self.cpu.registers.get_hl()));
             ui.label(format!("SP: 0x{:X}", self.cpu.registers.sp));
             ui.label(format!("PC: 0x{:X}", self.cpu.registers.pc));
+            ui.checkbox(&mut self.cpu.get_ime(), "IME");
 
             if ui.button("Step").clicked() {
                 self.cpu.step();

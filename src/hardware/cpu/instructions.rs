@@ -32,7 +32,7 @@ pub enum JRTarget {
     NZ,
     C,
     NC,
-    I8
+    I8,
 }
 
 
@@ -53,6 +53,7 @@ pub enum Instruction {
     XOR(Target, Target),
     RLCA,
     RRCA,
+    DI,
 }
 
 impl Instruction {
@@ -86,6 +87,9 @@ impl Instruction {
             0x32 => Instruction::LDD(HL, A),
             0x20 => Instruction::JR(JRTarget::NZ),
             0x3E => Instruction::LD(A, U8),
+            0xF3 => Instruction::DI,
+            0xE0 => Instruction::LD(U8, A),
+
             _ => Instruction::UNKNOWN(byte)
         }
     }

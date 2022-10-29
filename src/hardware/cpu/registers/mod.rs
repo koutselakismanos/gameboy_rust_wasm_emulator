@@ -53,6 +53,10 @@ impl Registers {
         concatenate_bytes(self.c, self.b)
     }
 
+    pub fn get_de(&self) -> u16 {
+        concatenate_bytes(self.e, self.d)
+    }
+
     pub fn get_hl(&self) -> u16 {
         concatenate_bytes(self.l, self.h)
     }

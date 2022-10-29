@@ -18,6 +18,7 @@ pub struct CPU {
     pub memory: Memory,
     pub registers: Registers,
     pub cartridge: Cartridge,
+    pub ime: bool,
     pub is_running: bool,
     pub cycles: Cycles,
 }
@@ -33,6 +34,7 @@ impl CPU {
             memory: Memory::new(),
             registers: Registers::new(),
             cartridge,
+            ime: false,
             is_running: true,
             cycles: Cycles {
                 machine: 0,
@@ -66,13 +68,24 @@ impl CPU {
         self.execute(instruction);
     }
 
+    pub fn get_ime(&self) -> bool {
+        self.ime
+    }
+
     pub fn execute(&mut self, instruction: Instruction) {
         print!("0x{:x} ", self.registers.pc - 1);
         match instruction {
             Instruction::NOP => println!("NOP"),
             Instruction::STOP => println!("STOP"),
+            Instruction::DI => {
+                self.ime = false;
+                println!("DI");
+            }
             Instruction::LD(a, b) => {
                 match (a, b) {
+                    (U8, A) => {
+                        unimplemented!("LD u8, A")
+                    }
                     (A, U8) => {
                         let mut pc = self.fetch_and_increment_pc();
                         let value = self.bus_read(pc);
@@ -153,8 +166,14 @@ impl CPU {
                     _ => { unimplemented!("DEC {:?}", target) }
                 }
             }
-            Instruction::RLCA => println!("RLCA"),
-            Instruction::RRCA => println!("RRCA"),
+            Instruction::RLCA => {
+                println!("RLCA");
+                unimplemented!("RLCA")
+            }
+            Instruction::RRCA => {
+                println!("RRCA");
+                unimplemented!("RRCA");
+            }
             Instruction::CP(a, b) => {
                 match (a, b) {
                     (A, U8) => {
